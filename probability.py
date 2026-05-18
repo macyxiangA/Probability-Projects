@@ -1,6 +1,10 @@
 import string
 import sys
 import math
+from pathlib import Path
+
+
+BASE_DIR = Path(__file__).resolve().parent
 
 
 def get_parameter_vectors():
@@ -16,7 +20,7 @@ def get_parameter_vectors():
     e=[0]*26
     s=[0]*26
 
-    with open('e.txt',encoding='utf-8') as f:
+    with open(BASE_DIR / 'e.txt',encoding='utf-8') as f:
         for line in f:
             #strip: removes the newline character
             #split: split the string on space character
@@ -25,14 +29,10 @@ def get_parameter_vectors():
             #we then subtract it from 'A' to give array index
             #This way 'A' gets index 0 and 'Z' gets index 25.
             e[ord(char)-ord('A')]=float(prob)
-    f.close()
-
-    with open('s.txt',encoding='utf-8') as f:
+    with open(BASE_DIR / 's.txt',encoding='utf-8') as f:
         for line in f:
             char,prob=line.strip().split(" ")
             s[ord(char)-ord('A')]=float(prob)
-    f.close()
-
     return (e,s)
     
 def shred(filename):
@@ -58,7 +58,6 @@ def shred(filename):
     boc=dict()
     with open (filename,encoding='utf-8') as f:
         corpus=f.read()
-    f.close()
     #convert all lowercase alphabets to uppercase
     corpus=corpus.upper()
     #initialize X
@@ -71,6 +70,10 @@ def shred(filename):
 
 
 if __name__ == "__main__":
+    if len(sys.argv) not in (2, 4):
+        print("Usage: python3 probability.py <letter-file> [english-prior spanish-prior]")
+        sys.exit(1)
+
     letterPath = sys.argv[1]
     if len(sys.argv) >= 4:
         eng = float(sys.argv[2])
@@ -78,6 +81,9 @@ if __name__ == "__main__":
     else:
         eng = 0.6
         spar = 0.4
+    if eng <= 0 or spar <= 0:
+        print("Error: priors must be positive.")
+        sys.exit(1)
 
     #step 1
     e, s = get_parameter_vectors()
@@ -114,7 +120,6 @@ if __name__ == "__main__":
 
     print("Compute P (Y = English | X)")
     print(f"{p_eng:.4f}")
-
 
 
 
